@@ -270,7 +270,7 @@ class ModelBuilder:
         model.summary()
         
         if save_path:
-            with open(save_path, 'w') as f:
+            with open(save_path, 'w', encoding='utf-8') as f:
                 model.summary(print_fn=lambda x: f.write(x + '\n'))
             print(f"\n✅ Model summary saved to {save_path}")
 
