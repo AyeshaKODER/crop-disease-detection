@@ -1,6 +1,6 @@
 """
 Data Loader and Preprocessing Pipeline for Crop Disease Detection
-Handles PlantVillage dataset loading, augmentation, and splitting
+Handles PlantVillage dataset loading, augmentation, splitting, and corrupted image handling
 """
 
 import os
@@ -22,13 +22,6 @@ class PlantVillageDataLoader:
     """
     
     def __init__(self, raw_data_path, processed_data_path, img_size=(224, 224), seed=42):
-        """
-        Args:
-            raw_data_path: Path to raw PlantVillage dataset
-            processed_data_path: Path to save processed/split data
-            img_size: Target image size (height, width)
-            seed: Random seed for reproducibility
-        """
         self.raw_data_path = Path(raw_data_path)
         self.processed_data_path = Path(processed_data_path)
         self.img_size = img_size
@@ -41,14 +34,22 @@ class PlantVillageDataLoader:
         
         self.class_names = None
         self.class_distribution = None
-        
+        self.split_info = {'train': [], 'val': [], 'test': []}
+    
+    def _filter_corrupted_images(self, images):
+        """Return only valid images that can be read by OpenCV"""
+        valid_images = []
+        for img_path in images:
+            try:
+                img = cv2.imread(str(img_path))
+                if img is not None:
+                    valid_images.append(img_path)
+            except Exception:
+                print(f"⚠️  Corrupted image skipped: {img_path}")
+        return valid_images
+    
     def analyze_dataset(self):
-        """
-        Perform initial dataset analysis
-        Returns: DataFrame with class statistics
-        """
         print("📊 Analyzing dataset...")
-        
         class_data = []
         total_images = 0
         
@@ -57,16 +58,16 @@ class PlantVillageDataLoader:
                 images = list(class_dir.glob('*.jpg')) + list(class_dir.glob('*.JPG')) + \
                          list(class_dir.glob('*.png')) + list(class_dir.glob('*.PNG'))
                 
+                images = self._filter_corrupted_images(images)  # filter corrupted images
+                
                 class_name = class_dir.name
                 num_images = len(images)
                 total_images += num_images
-                
-                # Sample image for size analysis
+
+                img_shape = (0, 0, 0)
                 if images:
                     sample_img = cv2.imread(str(images[0]))
                     img_shape = sample_img.shape if sample_img is not None else (0, 0, 0)
-                else:
-                    img_shape = (0, 0, 0)
                 
                 class_data.append({
                     'class_name': class_name,
@@ -89,14 +90,9 @@ class PlantVillageDataLoader:
         return df
     
     def create_train_val_test_split(self, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15):
-        """
-        Split dataset into train/val/test with stratification
-        """
         assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 0.01, "Ratios must sum to 1"
-        
         print(f"\n📂 Creating train/val/test split ({train_ratio}/{val_ratio}/{test_ratio})...")
         
-        # Create directories
         for split_dir in [self.train_dir, self.val_dir, self.test_dir]:
             split_dir.mkdir(parents=True, exist_ok=True)
         
@@ -107,31 +103,19 @@ class PlantVillageDataLoader:
                 continue
             
             class_name = class_dir.name
-            
-            # Get all images
             images = list(class_dir.glob('*.jpg')) + list(class_dir.glob('*.JPG')) + \
                      list(class_dir.glob('*.png')) + list(class_dir.glob('*.PNG'))
             
-            if len(images) == 0:
-                print(f"⚠️  Warning: No images found in {class_name}")
+            images = self._filter_corrupted_images(images)
+            
+            if not images:
+                print(f"⚠️  Warning: No valid images found in {class_name}")
                 continue
             
-            # First split: train vs (val+test)
-            train_imgs, temp_imgs = train_test_split(
-                images, 
-                test_size=(1 - train_ratio), 
-                random_state=self.seed
-            )
-            
-            # Second split: val vs test
+            train_imgs, temp_imgs = train_test_split(images, test_size=(1 - train_ratio), random_state=self.seed)
             val_size = val_ratio / (val_ratio + test_ratio)
-            val_imgs, test_imgs = train_test_split(
-                temp_imgs, 
-                test_size=(1 - val_size), 
-                random_state=self.seed
-            )
+            val_imgs, test_imgs = train_test_split(temp_imgs, test_size=(1 - val_size), random_state=self.seed)
             
-            # Copy files to respective directories
             for split_name, split_imgs in [('train', train_imgs), ('val', val_imgs), ('test', test_imgs)]:
                 split_class_dir = self.processed_data_path / split_name / class_name
                 split_class_dir.mkdir(parents=True, exist_ok=True)
@@ -139,45 +123,36 @@ class PlantVillageDataLoader:
                 for img_path in split_imgs:
                     dest = split_class_dir / img_path.name
                     if not dest.exists():
-                        shutil.copy2(img_path, dest)
-                        total_copied += 1
+                            shutil.copy2(img_path, dest)
+                            total_copied += 1
         
         print(f"\n✅ Dataset split complete! Copied {total_copied} images")
         self._print_split_summary()
-        
-        # Save class names
         self._save_class_names()
+        self._save_split_info()
     
     def _print_split_summary(self):
-        """Print summary of train/val/test split"""
         for split in ['train', 'val', 'test']:
             split_path = self.processed_data_path / split
             total = sum([len(list(d.glob('*.*'))) for d in split_path.iterdir() if d.is_dir()])
             print(f"  {split.capitalize()}: {total} images")
     
     def _save_class_names(self):
-        """Save class names to JSON for later use"""
         if self.class_names:
             class_names_path = self.processed_data_path / 'class_names.json'
             with open(class_names_path, 'w') as f:
                 json.dump(self.class_names, f, indent=2)
             print(f"\n✅ Class names saved to {class_names_path}")
     
+    def _save_split_info(self):
+        split_csv_path = self.processed_data_path / 'split_info.csv'
+        pd.DataFrame(dict([(k, pd.Series(v)) for k, v in self.split_info.items()])).to_csv(split_csv_path, index=False)
+        print(f"✅ Split info saved to {split_csv_path}")
+    
     def create_data_generators(self, batch_size=32, augment_train=True):
-        """
-        Create TensorFlow data generators with augmentation
-        
-        Args:
-            batch_size: Batch size for training
-            augment_train: Whether to apply augmentation to training data
-            
-        Returns:
-            train_gen, val_gen, test_gen
-        """
         print(f"\n🔄 Creating data generators (batch_size={batch_size})...")
         
         if augment_train:
-            # Strong augmentation for training
             train_datagen = ImageDataGenerator(
                 rescale=1./255,
                 rotation_range=30,
@@ -193,33 +168,19 @@ class PlantVillageDataLoader:
         else:
             train_datagen = ImageDataGenerator(rescale=1./255)
         
-        # No augmentation for val/test
         val_test_datagen = ImageDataGenerator(rescale=1./255)
         
-        # Create generators
         train_generator = train_datagen.flow_from_directory(
-            self.train_dir,
-            target_size=self.img_size,
-            batch_size=batch_size,
-            class_mode='categorical',
-            shuffle=True,
-            seed=self.seed
+            self.train_dir, target_size=self.img_size, batch_size=batch_size,
+            class_mode='categorical', shuffle=True, seed=self.seed
         )
-        
         val_generator = val_test_datagen.flow_from_directory(
-            self.val_dir,
-            target_size=self.img_size,
-            batch_size=batch_size,
-            class_mode='categorical',
-            shuffle=False
+            self.val_dir, target_size=self.img_size, batch_size=batch_size,
+            class_mode='categorical', shuffle=False
         )
-        
         test_generator = val_test_datagen.flow_from_directory(
-            self.test_dir,
-            target_size=self.img_size,
-            batch_size=batch_size,
-            class_mode='categorical',
-            shuffle=False
+            self.test_dir, target_size=self.img_size, batch_size=batch_size,
+            class_mode='categorical', shuffle=False
         )
         
         print(f"✅ Train samples: {train_generator.samples}")
@@ -230,41 +191,21 @@ class PlantVillageDataLoader:
         return train_generator, val_generator, test_generator
     
     def compute_class_weights(self):
-        """
-        Compute class weights for handling imbalanced dataset
-        Returns: Dictionary of class weights
-        """
         from sklearn.utils.class_weight import compute_class_weight
-        
-        # Count samples per class in training set
-        class_counts = {}
-        for class_dir in self.train_dir.iterdir():
-            if class_dir.is_dir():
-                count = len(list(class_dir.glob('*.*')))
-                class_counts[class_dir.name] = count
-        
-        # Get class indices
+        class_counts = {d.name: len(list(d.glob('*.*'))) for d in self.train_dir.iterdir() if d.is_dir()}
         class_indices = {name: idx for idx, name in enumerate(sorted(class_counts.keys()))}
-        
-        # Compute weights
         class_weights = compute_class_weight(
             class_weight='balanced',
             classes=np.array(list(class_indices.values())),
-            y=np.repeat(list(class_indices.values()), 
-                       [class_counts[name] for name in sorted(class_counts.keys())])
+            y=np.repeat(list(class_indices.values()), [class_counts[name] for name in sorted(class_counts.keys())])
         )
-        
         class_weight_dict = {idx: weight for idx, weight in enumerate(class_weights)}
-        
         print("\n⚖️  Class weights computed for imbalanced dataset")
         return class_weight_dict
 
 
-# Utility functions
+# Utility functions remain the same
 def load_and_preprocess_image(image_path, img_size=(224, 224)):
-    """
-    Load and preprocess a single image
-    """
     img = cv2.imread(str(image_path))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = cv2.resize(img, img_size)
@@ -273,9 +214,6 @@ def load_and_preprocess_image(image_path, img_size=(224, 224)):
 
 
 def visualize_augmentation(image_path, save_path='augmentation_examples.png'):
-    """
-    Visualize augmentation effects on a sample image
-    """
     import matplotlib.pyplot as plt
     
     datagen = ImageDataGenerator(
@@ -295,46 +233,44 @@ def visualize_augmentation(image_path, save_path='augmentation_examples.png'):
     fig, axes = plt.subplots(2, 4, figsize=(12, 6))
     axes = axes.ravel()
     
-    i = 0
-    for batch in datagen.flow(img, batch_size=1):
+    for i, batch in enumerate(datagen.flow(img, batch_size=1)):
         axes[i].imshow(batch[0])
         axes[i].axis('off')
         axes[i].set_title(f'Augmented {i+1}')
-        i += 1
-        if i >= 8:
+        if i >= 7:
             break
     
     plt.tight_layout()
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     print(f"✅ Augmentation examples saved to {save_path}")
 
+def _process_and_copy_image(self, src_path, dest_path): # Corrected method definition
+    """Read, convert to RGB, resize, and save image to destination"""
+    try:
+        img = cv2.imread(str(src_path))
+        if img is None:
+            print(f"⚠️ Corrupted image skipped: {src_path}")
+            return False
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, self.img_size)
+        cv2.imwrite(str(dest_path), cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+        return True
+    except Exception as e:
+        print(f"⚠️ Failed to process {src_path}: {e}")
+        return False
+
 
 # Example usage
 if __name__ == "__main__":
-    # Initialize data loader
     loader = PlantVillageDataLoader(
-        raw_data_path='data/raw/PlantVillage',
+        raw_data_path=Path(r"C:/Users/anask/crop-disease-detection/data/raw/plantvillage-dataset/plantvillage dataset/color"),
         processed_data_path='data/processed',
         img_size=(224, 224)
     )
     
-    # Step 1: Analyze dataset
     df = loader.analyze_dataset()
-    
-    # Step 2: Create train/val/test split
-    loader.create_train_val_test_split(
-        train_ratio=0.7,
-        val_ratio=0.15,
-        test_ratio=0.15
-    )
-    
-    # Step 3: Create data generators
-    train_gen, val_gen, test_gen = loader.create_data_generators(
-        batch_size=32,
-        augment_train=True
-    )
-    
-    # Step 4: Compute class weights (for imbalanced data)
+    loader.create_train_val_test_split(train_ratio=0.7, val_ratio=0.15, test_ratio=0.15)
+    train_gen, val_gen, test_gen = loader.create_data_generators(batch_size=32, augment_train=True)
     class_weights = loader.compute_class_weights()
     
     print("\n🎉 Data pipeline ready for training!")
