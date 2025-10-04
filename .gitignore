@@ -81,4 +81,7 @@ data/processed/
 # Ignore raw dataset if too large
 data/raw/plantvillage-dataset/
 
+src/logs/
+src/models/
+
 
