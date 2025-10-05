@@ -297,7 +297,7 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.image("https://drive.google.com/uc?export=download&id=10XGQMIEIvAvoidoiHlCzYI499tZgKFFd", 
+        st.image("https://raw.githubusercontent.com/AyeshaKODER/crop-disease-detection/main/app/static/leaf.png", 
                  use_container_width=True)
         
         st.markdown("### About This Tool")
@@ -307,7 +307,7 @@ def main():
             
             **What it does:**
             - Identifies 38 different crop diseases
-            - 96%+ accuracy
+            - 99%+ accuracy
             - Provides treatment recommendations
             - Suggests prevention methods
             """
