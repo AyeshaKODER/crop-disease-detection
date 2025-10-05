@@ -333,24 +333,15 @@ Contributions are welcome! Please follow these steps:
 
 ## 👨‍💻 Author
 
-**Your Name**
+**Ayesha Khalil Khan**
 
-- GitHub: [@yourusername](https://github.com/AyeshaKODER)
-- LinkedIn: [Your Profile](https://www.linkedin.com/in/iayeshakoder)
+- GitHub: [@AyeshaKODER](https://github.com/AyeshaKODER)
+- LinkedIn: [Ayesha's Profile](https://www.linkedin.com/in/iayeshakoder)
 - Email: iayeshakhan2004@gmail.com
 
 ---
 
 ---
 
-## 📞 Support
-
-For questions or issues:
-
-- Open an issue on GitHub
-- Email: your.email@example.com
-- Join our [Discord](https://discord.gg/yourserver) community
-
----
-
 **Made with ❤️ for sustainable agriculture**
+
