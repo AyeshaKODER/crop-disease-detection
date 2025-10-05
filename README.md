@@ -182,6 +182,7 @@ crop-disease-detection/
 | EfficientNetB0  | 97.1%         | 99.4%          | 18 MB      | 70ms           |
 | ResNet50        | 95.8%         | 98.9%          | 98 MB      | 120ms          |
 
+
 ### Sample images 
 
 ![Sample Images](notebooks/results/sample_images.png)
