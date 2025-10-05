@@ -122,6 +122,8 @@ crop-disease-detection/
 │   ├── 01_eda.ipynb           # Exploratory Data Analysis
 │   ├── 02_preprocessing.ipynb # Data preprocessing experiments
 │   └── 03_model_training.ipynb # Model training experiments
+│   ├── 04_evaluation.ipynb     # evaluating the results
+|    
 ├── src/
 │   ├── data_loader.py         # Data loading & augmentation
 │   ├── model.py               # Model architectures
@@ -180,13 +182,17 @@ crop-disease-detection/
 | EfficientNetB0  | 97.1%         | 99.4%          | 18 MB      | 70ms           |
 | ResNet50        | 95.8%         | 98.9%          | 98 MB      | 120ms          |
 
+### Sample images 
+
+![Sample Images](notebooks/results/sample_images.png)
+
 ### Training Curves
 
 ![Training Curves](results/training_curves.png)
 
 ### Confusion Matrix
 
-![Confusion Matrix](results/confusion_matrix.png)
+![Confusion Matrix](notebooks/confusion_matrix.png)
 
 ### Per-Class Performance
 
@@ -289,11 +295,11 @@ If you use this project, please cite:
 
 ```bibtex
 @misc{crop-disease-detection-2025,
-  author = {Your Name},
+  author = {Ayesha Khan},
   title = {Crop Disease Detection using Deep Learning},
   year = {2025},
   publisher = {GitHub},
-  url = {https://github.com/yourusername/crop-disease-detection}
+  url = {https://github.com/AyeshaKODER/crop-disease-detection}
 }
 ```
 
@@ -322,36 +328,17 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ---
 
 ## 👨‍💻 Author
 
 **Your Name**
 
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/AyeshaKODER)
+- LinkedIn: [Your Profile](https://www.linkedin.com/in/iayeshakoder)
+- Email: iayeshakhan2004@gmail.com
 
 ---
-
-## 🙏 Acknowledgments
-
-- **PlantVillage Dataset** by Hughes & Salathé
-- **TensorFlow Team** for excellent documentation
-- **Streamlit** for the amazing web framework
-- **Kaggle** for hosting the dataset
-
----
-
-## ⭐ Star History
-
-If you find this project useful, please consider giving it a star ⭐
-
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/crop-disease-detection&type=Date)](https://star-history.com/#yourusername/crop-disease-detection&Date)
 
 ---
 
