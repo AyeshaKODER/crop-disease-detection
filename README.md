@@ -204,9 +204,9 @@ crop-disease-detection/
 
 ---
 ---
-##  Streamlit App
+## Streamlit App
 
-
+![App Demo](app/static/assets/streamlit_app.mp4.gif)
 ---
 ---
 ## 🔧 Usage
