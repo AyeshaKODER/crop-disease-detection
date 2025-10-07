@@ -140,8 +140,11 @@ crop-disease-detection/
 ├── results/
 │   ├── training_curves.png    # Training/validation curves
 │   ├── confusion_matrix.png   # Confusion matrix
-│   ├── classification_report.csv
-│   └── evaluation_metrics.json
+│   ├── classification_report.txt
+│   └── preprocessing_comparison.png
+│   └── sample_images.png
+│  
+│
 ├── logs/                      # TensorBoard logs
 ├── requirements.txt
 ├── README.md
@@ -184,7 +187,7 @@ crop-disease-detection/
 
 
 ### Sample Images
-![Sample Images](notebooks/results/sample_images.png)
+![Sample Images](results/sample_images.png)
 
 ### Training Curves
 ![Training Curves](models/training_curve.png)

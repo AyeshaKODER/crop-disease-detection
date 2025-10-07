@@ -43,7 +43,7 @@ models/saved_models/
 
 # Logs / results / temporary files
 *.log
-results/
+notebooks/results/
 *.csv
 *.h5
 *.pth
