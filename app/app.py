@@ -307,7 +307,7 @@ def main():
             
             **What it does:**
             - Identifies 38 different crop diseases
-            - 99%+ accuracy
+            - 96%+ accuracy
             - Provides treatment recommendations
             - Suggests prevention methods
             """

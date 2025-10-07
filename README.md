@@ -190,10 +190,11 @@ crop-disease-detection/
 ![Sample Images](results/sample_images.png)
 
 ### Training Curves
-![Training Curves](models/training_curve.png)
+![Training Curves](results/training_curve.png)
 
 ### Confusion Matrix
-![Confusion Matrix](notebooks/confusion_matrix.png)
+![Confusion Matrix](results/confusion_matrix.png)
+
 
 ### Per-Class Performance
 
@@ -202,7 +203,12 @@ crop-disease-detection/
 - **Overall F1-Score**: 0.96
 
 ---
+---
+##  Streamlit App
 
+
+---
+---
 ## 🔧 Usage
 
 ### Training with Custom Parameters
