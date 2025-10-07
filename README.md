@@ -183,16 +183,13 @@ crop-disease-detection/
 | ResNet50        | 95.8%         | 98.9%          | 98 MB      | 120ms          |
 
 
-### Sample images 
-
+### Sample Images
 ![Sample Images](notebooks/results/sample_images.png)
 
 ### Training Curves
-
-![Training Curves](results/training_curves.png)
+![Training Curves](models/training_curve.png)
 
 ### Confusion Matrix
-
 ![Confusion Matrix](notebooks/confusion_matrix.png)
 
 ### Per-Class Performance
