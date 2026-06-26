@@ -6,7 +6,11 @@
 
 An AI-powered plant disease detection system using Convolutional Neural Networks (CNNs) and Transfer Learning. The model achieves **96%+ accuracy** on the PlantVillage dataset with 38 disease classes across 14 crop species.
 
-![Demo](docs/demo_screenshot.png)
+---
+## Streamlit App
+
+![App Demo](app/static/assets/streamlit_app.mp4.gif)
+---
 
 ---
 
@@ -202,11 +206,6 @@ crop-disease-detection/
 - **Challenging Classes**: Early-stage diseases with subtle symptoms
 - **Overall F1-Score**: 0.96
 
----
----
-## Streamlit App
-
-![App Demo](app/static/assets/streamlit_app.mp4.gif)
 ---
 ---
 ## 🔧 Usage
