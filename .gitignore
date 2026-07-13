@@ -38,9 +38,6 @@ data/raw/
 data/processed/
 data/augmented/
 
-# Models (don’t push large model files)
-models/saved_models/
-
 # Logs / results / temporary files
 *.log
 notebooks/results/
